@@ -8,8 +8,14 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/", (req, res, next) => {
+  const product = {
+    name: req.body.name,
+    price: req.body.price,
+  };
+
   res.status(201).send({
     message: "POST product: all good",
+    createdProduct: product,
   });
 });
 
@@ -21,11 +27,11 @@ router.get("/:_id", (req, res, next) => {
       message: "GET special product: all good",
       id: id,
     });
-  } else{
+  } else {
     res.status(200).send({
-        message: "GET especific product: all good",
-        id: id,
-      });
+      message: "GET especific product: all good",
+      id: id,
+    });
   }
 });
 
