@@ -3,13 +3,13 @@ const router = express.Router();
 
 router.get("/", (req, res, next) => {
   res.status(200).send({
-    message: "GET products: all good",
+    message: "GET orders: all good",
   });
 });
 
 router.post("/", (req, res, next) => {
   res.status(201).send({
-    message: "POST product: all good",
+    message: "POST order: all good",
   });
 });
 
@@ -18,12 +18,12 @@ router.get("/:_id", (req, res, next) => {
 
   if (id === "special") {
     res.status(200).send({
-      message: "GET special product: all good",
+      message: "GET special order: all good",
       id: id,
     });
   } else{
     res.status(200).send({
-        message: "GET especific product: all good",
+        message: "GET especific order: all good",
         id: id,
       });
   }
@@ -31,13 +31,13 @@ router.get("/:_id", (req, res, next) => {
 
 router.patch("/", (req, res, next) => {
   res.status(201).send({
-    message: "PATCH product: all good",
+    message: "PATCH order: all good",
   });
 });
 
 router.delete("/", (req, res, next) => {
   res.status(201).send({
-    message: "DELETE product: all good",
+    message: "DELETE order: all good",
   });
 });
 
