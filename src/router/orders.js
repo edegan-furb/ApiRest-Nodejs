@@ -9,7 +9,7 @@ router.get("/", (req, res, next) => {
 
 router.post("/", (req, res, next) => {
   const order = {
-    _id: req.body._id,
+    id_product: req.body.id_product,
     quantity: req.body.quantity,
   };
   res.status(201).send({
@@ -19,7 +19,7 @@ router.post("/", (req, res, next) => {
 });
 
 router.get("/:_id", (req, res, next) => {
-  const id = req.params._id;
+  const id = req.id_order;
 
   if (id === "special") {
     res.status(200).send({

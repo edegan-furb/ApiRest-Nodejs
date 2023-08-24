@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mysql = require("../mysql").pool;
 
 router.get("/", (req, res, next) => {
   res.status(200).send({
@@ -8,19 +9,38 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/", (req, res, next) => {
-  const product = {
-    name: req.body.name,
-    price: req.body.price,
-  };
+  mysql.getConnection((error, conn) => {
+    if (error) {
+      return res.status(500).send({
+        error: error,
+        response: null,
+      });
+    }
 
-  res.status(201).send({
-    message: "POST product: all good",
-    createdProduct: product,
+    conn.query(
+      "INSERT INTO products (name, price) VALUES (?, ?)",
+      [req.body.name, req.body.price],
+      (error, result, fields) => {
+        conn.release();
+
+        if (error) {
+          return res.status(500).send({
+            error: error,
+            response: null,
+          });
+        }
+
+        res.status(201).send({
+          message: "Product inserted successfully",
+          id_product: result.insertId,
+        });
+      }
+    );
   });
 });
 
 router.get("/:_id", (req, res, next) => {
-  const id = req.params._id;
+  const id = req.params.id_product;
 
   if (id === "special") {
     res.status(200).send({
