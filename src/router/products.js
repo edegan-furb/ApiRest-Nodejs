@@ -13,12 +13,24 @@ router.get("/", (req, res, next) => {
     conn.query("SELECT * FROM products;", (error, result, fields) => {
       conn.release();
       if (error) {
-        return res.status(500).send({
-          error: error,
-          response: null,
-        });
+        return res.status(500).send({ error: error });
       }
-      return res.status(200).send({ response: result });
+      const response = {
+        quantity: result.length,
+        products: result.map((prod) => {
+          return {
+            id_product: prod.id_product,
+            name: prod.name,
+            price: prod.price,
+            request: {
+              type: "GET",
+              description: "return all products",
+              URL: "http://localhost:3000/products/" + prod.id_product,
+            },
+          };
+        }),
+      };
+      return res.status(200).send({ response });
     });
   });
 });
@@ -44,23 +56,30 @@ router.post("/", (req, res, next) => {
             response: null,
           });
         }
-
-        res.status(201).send({
+        const response = {
           message: "Product inserted successfully",
-          id_product: result.insertId,
-        });
+          productCreated: {
+            id_product: result.insertId,
+            name: req.body.name,
+            price: req.body.price,
+            request: {
+              type: "POST",
+              description: "insert product",
+              URL: "http://localhost:3000/products/" + result.insertId,
+            },
+          },
+        };
+
+        res.status(201).send(response);
       }
     );
   });
 });
 
-router.get("/:_id", (req, res, next) => {
+router.get("/:id_product", (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
-      return res.status(500).send({
-        error: error,
-        response: null,
-      });
+      return res.status(500).send({ error: error });
     }
     conn.query(
       "SELECT * FROM products WHERE id_product = ?;",
@@ -68,12 +87,24 @@ router.get("/:_id", (req, res, next) => {
       (error, result, fields) => {
         conn.release();
         if (error) {
-          return res.status(500).send({
-            error: error,
-            response: null,
-          });
+          return res.status(500).send({ error: error });
         }
-        return res.status(200).send({ response: result });
+        if (result.length == 0) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        const response = {
+          product: {
+            id_product: result[0].id_product,
+            name: result[0].name,
+            price: result[0].price,
+            request: {
+              type: "GET",
+              description: "return product by id",
+              URL: "http://localhost:3000/products",
+            },
+          },
+        };
+        return res.status(200).send({ response });
       }
     );
   });
@@ -98,15 +129,23 @@ router.patch("/", (req, res, next) => {
         conn.release();
 
         if (error) {
-          return res.status(500).send({
-            error: error,
-            response: null,
-          });
+          return res.status(500).send({ error: error });
         }
-
-        res.status(202).send({
+        const response = {
           message: "Product updated successfully",
-        });
+          productUpdated: {
+            id_product: req.body.id_product,
+            name: req.body.name,
+            price: req.body.price,
+            request: {
+              type: "PATCH",
+              description: "updated product",
+              URL: "http://localhost:3000/products/" + req.body.id_product,
+            },
+          },
+        };
+
+        res.status(202).send({ response });
       }
     );
   });
@@ -120,7 +159,6 @@ router.delete("/", (req, res, next) => {
         response: null,
       });
     }
-
     conn.query(
       `DELETE FROM products WHERE id_product = ?`,
       [req.body.id_product],
@@ -133,10 +171,19 @@ router.delete("/", (req, res, next) => {
             response: null,
           });
         }
+        const response = {
+          message: "Product deleted successfully",
+          productCreated: {
+            id_product: req.body.id_product,
+            request: {
+              type: "DELETE",
+              description: "delete product",
+              URL: "http://localhost:3000/products/",
+            },
+          },
+        };
 
-        res.status(202).send({
-          message: "Product removed successfully",
-        });
+        res.status(201).send(response);
       }
     );
   });
