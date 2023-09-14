@@ -1,6 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const mysql = require("../mysql").pool;
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads/");
+  },
+  filename: function (req, file, cb) {
+    let data = new Date().toISOString().replace(/:/g, "-") + "-";
+    cb(null, data + file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fieldSize: 1024 * 1024 * 5,
+  },
+  fileFilter: fileFilter,
+});
 
 router.get("/", (req, res, next) => {
   mysql.getConnection((error, conn) => {
@@ -13,15 +39,15 @@ router.get("/", (req, res, next) => {
         return res.status(500).send({ error: error });
       }
       const response = {
-        quantity: result.length,
         products: result.map((prod) => {
           return {
             id_product: prod.id_product,
             name: prod.name,
             price: prod.price,
+            image_product: prod.image_product,
             request: {
               type: "GET",
-              description: "return all products",
+              description: "return products by id",
               URL: "http://localhost:3000/products/" + prod.id_product,
             },
           };
@@ -32,7 +58,7 @@ router.get("/", (req, res, next) => {
   });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", upload.single("image_product"), (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
       return res.status(500).send({
@@ -42,8 +68,8 @@ router.post("/", (req, res, next) => {
     }
 
     conn.query(
-      "INSERT INTO products (name, price) VALUES (?, ?)",
-      [req.body.name, req.body.price],
+      "INSERT INTO products (name, price, image_product) VALUES (?, ?, ?)",
+      [req.body.name, req.body.price, req.file.path],
       (error, result, fields) => {
         conn.release();
 
@@ -59,6 +85,7 @@ router.post("/", (req, res, next) => {
             id_product: result.insertId,
             name: req.body.name,
             price: req.body.price,
+            image_product: req.file.path,
             request: {
               type: "GET",
               description: "get product by id",
@@ -94,6 +121,7 @@ router.get("/:id_product", (req, res, next) => {
             id_product: result[0].id_product,
             name: result[0].name,
             price: result[0].price,
+            image_product: result[0].image_product,
             request: {
               type: "GET",
               description: "return all orders",
@@ -107,7 +135,7 @@ router.get("/:id_product", (req, res, next) => {
   });
 });
 
-router.patch("/", (req, res, next) => {
+router.patch("/",upload.single("image_product"), (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
       return res.status(500).send({ error: error });
@@ -115,10 +143,11 @@ router.patch("/", (req, res, next) => {
 
     conn.query(
       `UPDATE products
-          SET name        = ?,
-              price       = ?
-        WHERE id_product  = ?`,
-      [req.body.name, req.body.price, req.body.id_product],
+          SET name          = ?,
+              price         = ?,
+              image_product = ?
+        WHERE id_product    = ?`,
+      [req.body.name, req.body.price,req.file.path, req.body.id_product],
       (error, result, fields) => {
         conn.release();
 
@@ -131,6 +160,7 @@ router.patch("/", (req, res, next) => {
             id_product: req.body.id_product,
             name: req.body.name,
             price: req.body.price,
+            image_product: req.file.path,
             request: {
               type: "GET",
               description: "return order by id",

@@ -7,28 +7,41 @@ router.get("/", (req, res, next) => {
     if (error) {
       return res.status(500).send({ error: error });
     }
-    conn.query("SELECT * FROM orders;", (error, result, fields) => {
-      conn.release();
-      if (error) {
-        return res.status(500).send({ error: error });
+    conn.query(
+      `SELECT orders.id_order,
+              orders.quantity,
+              products.id_product,
+              products.name,
+              products.price
+         FROM orders
+   INNER JOIN products
+           ON products.id_product = orders.id_product;`,
+      (error, result, fields) => {
+        conn.release();
+        if (error) {
+          return res.status(500).send({ error: error });
+        }
+        const response = {
+          orders: result.map((order) => {
+            return {
+              id_order: order.id_order,
+              quantity: order.quantity,
+              product: {
+                id_product: order.id_product,
+                name: order.name,
+                price: order.price,
+              },
+              request: {
+                type: "GET",
+                description: "return order by id",
+                URL: "http://localhost:3000/orders/" + order.id_order,
+              },
+            };
+          }),
+        };
+        return res.status(200).send({ response });
       }
-      const response = {
-        quantity: result.length,
-        orders: result.map((order) => {
-          return {
-            id_order: order.id_order,
-            id_product: order.id_product,
-            quantity: order.quantity,
-            request: {
-              type: "GET",
-              description: "return all orders",
-              URL: "http://localhost:3000/orders/" + order.id_order,
-            },
-          };
-        }),
-      };
-      return res.status(200).send({ response });
-    });
+    );
   });
 });
 
@@ -83,7 +96,15 @@ router.get("/:id_order", (req, res, next) => {
       return res.status(500).send({ error: error });
     }
     conn.query(
-      "SELECT * FROM orders WHERE id_order = ?;",
+      `SELECT orders.id_order,
+              orders.quantity,
+              products.id_product,
+              products.name,
+              products.price
+         FROM orders
+   INNER JOIN products
+           ON products.id_product = orders.id_product
+        WHERE id_order = ?;`,
       [req.params.id_order],
       (error, result, fields) => {
         conn.release();
@@ -96,8 +117,12 @@ router.get("/:id_order", (req, res, next) => {
         const response = {
           order: {
             id_order: result[0].id_order,
-            id_product: result[0].id_product,
             quantity: result[0].quantity,
+            product: {
+              id_product: result[0].id_product,
+              name: result[0].name,
+              price: result[0].price,
+            },
             request: {
               type: "GET",
               description: "return all orders",
