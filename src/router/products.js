@@ -5,10 +5,7 @@ const mysql = require("../mysql").pool;
 router.get("/", (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
-      return res.status(500).send({
-        error: error,
-        response: null,
-      });
+      return res.status(500).send({ error: error });
     }
     conn.query("SELECT * FROM products;", (error, result, fields) => {
       conn.release();
@@ -63,8 +60,8 @@ router.post("/", (req, res, next) => {
             name: req.body.name,
             price: req.body.price,
             request: {
-              type: "POST",
-              description: "insert product",
+              type: "GET",
+              description: "get product by id",
               URL: "http://localhost:3000/products/" + result.insertId,
             },
           },
@@ -99,7 +96,7 @@ router.get("/:id_product", (req, res, next) => {
             price: result[0].price,
             request: {
               type: "GET",
-              description: "return product by id",
+              description: "return all orders",
               URL: "http://localhost:3000/products",
             },
           },
@@ -113,10 +110,7 @@ router.get("/:id_product", (req, res, next) => {
 router.patch("/", (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
-      return res.status(500).send({
-        error: error,
-        response: null,
-      });
+      return res.status(500).send({ error: error });
     }
 
     conn.query(
@@ -138,8 +132,8 @@ router.patch("/", (req, res, next) => {
             name: req.body.name,
             price: req.body.price,
             request: {
-              type: "PATCH",
-              description: "updated product",
+              type: "GET",
+              description: "return order by id",
               URL: "http://localhost:3000/products/" + req.body.id_product,
             },
           },
@@ -166,19 +160,17 @@ router.delete("/", (req, res, next) => {
         conn.release();
 
         if (error) {
-          return res.status(500).send({
-            error: error,
-            response: null,
-          });
+          return res.status(500).send({ error: error });
         }
         const response = {
           message: "Product deleted successfully",
-          productCreated: {
-            id_product: req.body.id_product,
-            request: {
-              type: "DELETE",
-              description: "delete product",
-              URL: "http://localhost:3000/products/",
+          request: {
+            type: "POST",
+            description: "insert product",
+            URL: "http://localhost:3000/products/",
+            body: {
+              name: "String",
+              price: "Number",
             },
           },
         };
