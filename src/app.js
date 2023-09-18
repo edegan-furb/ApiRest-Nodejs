@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 
 const productsRoute = require("./router/products");
 const ordersRoute = require("./router/orders");
+const usersRoute = require("./router/users");
 
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
@@ -13,6 +14,7 @@ app.use(bodyParser.json());
 
 app.use("/products", productsRoute);
 app.use("/orders", ordersRoute);
+app.use("/users", usersRoute);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
