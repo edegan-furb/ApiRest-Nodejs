@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const mysql = require("../mysql").pool;
 const multer = require("multer");
+const login = require("../middleware/login");
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads/");
@@ -58,7 +60,7 @@ router.get("/", (req, res, next) => {
   });
 });
 
-router.post("/", upload.single("image_product"), (req, res, next) => {
+router.post("/", login.mandatory, upload.single("image_product"), (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
       return res.status(500).send({
@@ -135,47 +137,52 @@ router.get("/:id_product", (req, res, next) => {
   });
 });
 
-router.patch("/",upload.single("image_product"), (req, res, next) => {
-  mysql.getConnection((error, conn) => {
-    if (error) {
-      return res.status(500).send({ error: error });
-    }
+router.patch(
+  "/",
+  login.mandatory,
+  upload.single("image_product"),
+  (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+      if (error) {
+        return res.status(500).send({ error: error });
+      }
 
-    conn.query(
-      `UPDATE products
+      conn.query(
+        `UPDATE products
           SET name          = ?,
               price         = ?,
               image_product = ?
         WHERE id_product    = ?`,
-      [req.body.name, req.body.price,req.file.path, req.body.id_product],
-      (error, result, fields) => {
-        conn.release();
+        [req.body.name, req.body.price, req.file.path, req.body.id_product],
+        (error, result, fields) => {
+          conn.release();
 
-        if (error) {
-          return res.status(500).send({ error: error });
-        }
-        const response = {
-          message: "Product updated successfully",
-          productUpdated: {
-            id_product: req.body.id_product,
-            name: req.body.name,
-            price: req.body.price,
-            image_product: req.file.path,
-            request: {
-              type: "GET",
-              description: "return order by id",
-              URL: "http://localhost:3000/products/" + req.body.id_product,
+          if (error) {
+            return res.status(500).send({ error: error });
+          }
+          const response = {
+            message: "Product updated successfully",
+            productUpdated: {
+              id_product: req.body.id_product,
+              name: req.body.name,
+              price: req.body.price,
+              image_product: req.file.path,
+              request: {
+                type: "GET",
+                description: "return order by id",
+                URL: "http://localhost:3000/products/" + req.body.id_product,
+              },
             },
-          },
-        };
+          };
 
-        res.status(202).send({ response });
-      }
-    );
-  });
-});
+          res.status(202).send({ response });
+        }
+      );
+    });
+  }
+);
 
-router.delete("/", (req, res, next) => {
+router.delete("/", login.mandatory, (req, res, next) => {
   mysql.getConnection((error, conn) => {
     if (error) {
       return res.status(500).send({
