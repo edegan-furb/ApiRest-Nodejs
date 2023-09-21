@@ -33,7 +33,7 @@ const upload = multer({
 
 router.get("/", ProductController.getProduct);
 router.get("/:id_product", ProductController.getProductById);
-router.delete("/", login.mandatory, ProductController.deleteProduct);
+router.delete("/:id_product", login.mandatory, ProductController.deleteProduct);
 router.patch(
   "/",
   login.mandatory,

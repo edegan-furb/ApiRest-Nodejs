@@ -118,7 +118,7 @@ exports.patchProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     const query = `DELETE FROM products WHERE id_product = ?`;
-    await mysql.execute(query, [req.body.id_product]);
+    await mysql.execute(query, [req.params.id_product]);
     const response = {
       message: "Product deleted successfully",
       request: {

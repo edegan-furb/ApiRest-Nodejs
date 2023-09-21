@@ -1,4 +1,3 @@
-const { query } = require("express");
 const mysql = require("../mysql");
 
 exports.getOrders = async (req, res, next) => {
@@ -143,7 +142,7 @@ exports.patchOrder = async (req, res, next) => {
 exports.deleteOrder = async (req, res, next) => {
   try {
     const query = `DELETE FROM orders WHERE id_order = ?`;
-    await mysql.execute(query, [req.body.id_order]);
+    await mysql.execute(query, [req.params.id_order]);
     
     const response = {
       message: "Order deleted successfully",
