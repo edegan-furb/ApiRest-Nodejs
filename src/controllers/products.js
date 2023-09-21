@@ -19,7 +19,6 @@ exports.getProduct = async (req, res, next) => {
           id_product: prod.id_product,
           name: prod.name,
           price: prod.price,
-          image_product: prod.image_product,
           id_categories: prod.id_categories,
           request: {
             type: "GET",
@@ -46,11 +45,10 @@ exports.postProduct = async (req, res, next) => {
       return res.status(404).send({ message: "Category not found" });
     }
 
-    const query = `INSERT INTO products (name, price, image_product, id_categories) VALUES (?, ?, ?, ?)`;
+    const query = `INSERT INTO products (name, price, id_categories) VALUES (?, ?, ?)`;
     const result = await mysql.execute(query, [
       req.body.name,
       req.body.price,
-      req.file.path,
       req.body.id_categories,
     ]);
     const response = {
@@ -59,7 +57,6 @@ exports.postProduct = async (req, res, next) => {
         id_product: result.insertId,
         name: req.body.name,
         price: req.body.price,
-        image_product: req.file.path,
         id_categories: req.body.id_categories,
         request: {
           type: "GET",
@@ -88,7 +85,6 @@ exports.getProductById = async (req, res, next) => {
         id_product: result[0].id_product,
         name: result[0].name,
         price: result[0].price,
-        image_product: result[0].image_product,
         id_categories: result[0].id_categories,
         request: {
           type: "GET",
@@ -126,13 +122,11 @@ exports.patchProduct = async (req, res, next) => {
     const query = `UPDATE products
                     SET name          = ?,
                         price         = ?,
-                        image_product = ?,
                         id_categories = ?
-                  WHERE id_product     = ?`;
+                  WHERE id_product    = ?`;
     await mysql.execute(query, [
       req.body.name,
       req.body.price,
-      req.file.path,
       req.body.id_categories,
       req.params.id_product,
     ]);
@@ -143,7 +137,6 @@ exports.patchProduct = async (req, res, next) => {
         id_product: req.body.id_product,
         name: req.body.name,
         price: req.body.price,
-        image_product: req.file.path,
         id_categories: req.body.id_categories,
         request: {
           type: "GET",
@@ -175,7 +168,6 @@ exports.deleteProduct = async (req, res, next) => {
         body: {
           name: "String",
           price: "Number",
-          image_product: "File",
           id_categories: "Number",
         },
       },

@@ -2,14 +2,24 @@ const mysql = require("../mysql");
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const query = `SELECT orders.id_order,
-                          orders.quantity,
-                          products.id_product,
-                          products.name,
-                          products.price
-                     FROM orders
-               INNER JOIN products
-                       ON products.id_product = orders.id_product;`;
+    const query = `SELECT 
+                       orders.id_order,
+                       orders.quantity,
+                       products.id_product,
+                       products.name,
+                       products.price,
+                       users.id_user,
+                       users.email
+                   FROM 
+                       orders
+                   INNER JOIN 
+                       products
+                   ON 
+                       products.id_product = orders.id_product
+                   INNER JOIN 
+                       users
+                   ON 
+                       users.id_user = orders.id_user;`;
     const result = await mysql.execute(query);
     const response = {
       orders: result.map((order) => {
@@ -20,6 +30,10 @@ exports.getOrders = async (req, res, next) => {
             id_product: order.id_product,
             name: order.name,
             price: order.price,
+          },
+          user: {
+            id_user: order.id_user,
+            email: order.email,
           },
           request: {
             type: "GET",
@@ -46,16 +60,20 @@ exports.postOrder = async (req, res, next) => {
       return res.status(404).send({ message: "Product not found" });
     }
 
+    const id_user = req.user.id_user;
+
     const orderQuery =
-      "INSERT INTO orders (id_product, quantity) VALUES (?, ?)";
+      "INSERT INTO orders (id_product, quantity, id_user) VALUES (?, ?, ?);";
     const orderResult = await mysql.execute(orderQuery, [
       req.body.id_product,
       req.body.quantity,
+      id_user,
     ]);
     const response = {
       message: "Order inserted successfully",
       orderCreated: {
         id_order: orderResult.insertId,
+        id_user: id_user,
         id_product: req.body.id_product,
         quantity: req.body.quantity,
         request: {
@@ -73,15 +91,26 @@ exports.postOrder = async (req, res, next) => {
 
 exports.getOrderById = async (req, res, next) => {
   try {
-    const query = `SELECT orders.id_order,
-                          orders.quantity,
-                          products.id_product,
-                          products.name,
-                          products.price
-                     FROM orders
-               INNER JOIN products
-                       ON products.id_product = orders.id_product
-                    WHERE id_order = ?;`;
+    const query = `SELECT 
+                       orders.id_order,
+                       orders.quantity,
+                       products.id_product,
+                       products.name,
+                       products.price,
+                       users.id_user,
+                       users.email
+                   FROM 
+                       orders
+                   INNER JOIN 
+                       products
+                   ON 
+                       products.id_product = orders.id_product
+                   INNER JOIN 
+                       users
+                   ON 
+                       users.id_user = orders.id_user
+                   WHERE 
+                       orders.id_order = ?;`;
     const result = await mysql.execute(query, [req.params.id_order]);
 
     if (result.length == 0) {
@@ -96,6 +125,10 @@ exports.getOrderById = async (req, res, next) => {
           id_product: result[0].id_product,
           name: result[0].name,
           price: result[0].price,
+        },
+        user: {
+          id_user: result[0].id_user,
+          id_email: result[0].email,
         },
         request: {
           type: "GET",
