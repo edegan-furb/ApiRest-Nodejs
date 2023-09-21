@@ -119,6 +119,11 @@ exports.patchOrder = async (req, res, next) => {
       req.body.quantity,
       req.body.id_order,
     ]);
+
+    if (result.length === 0) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
     const response = {
       message: "Order updated successfully",
       productUpdated: {
@@ -142,8 +147,12 @@ exports.patchOrder = async (req, res, next) => {
 exports.deleteOrder = async (req, res, next) => {
   try {
     const query = `DELETE FROM orders WHERE id_order = ?`;
-    await mysql.execute(query, [req.params.id_order]);
-    
+    const result = await mysql.execute(query, [req.params.id_order]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
     const response = {
       message: "Order deleted successfully",
       request: {

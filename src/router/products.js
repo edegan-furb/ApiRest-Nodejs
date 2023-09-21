@@ -35,7 +35,7 @@ router.get("/", ProductController.getProduct);
 router.get("/:id_product", ProductController.getProductById);
 router.delete("/:id_product", login.mandatory, ProductController.deleteProduct);
 router.patch(
-  "/",
+  "/:id_product",
   login.mandatory,
   upload.single("image_product"),
   ProductController.patchProduct

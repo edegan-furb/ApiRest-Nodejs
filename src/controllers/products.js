@@ -2,7 +2,17 @@ const mysql = require("../mysql");
 
 exports.getProduct = async (req, res, next) => {
   try {
-    const result = await mysql.execute("SELECT * FROM products;");
+    const name = req.query.name || '';
+
+    const query = `
+            SELECT *
+               FROM products
+              WHERE id_categories = ?
+                AND (
+                    name LIKE '%${name}%'
+                );
+        `;
+    const result = await mysql.execute(query, [req.query.id_categories]);
     const response = {
       products: result.map((prod) => {
         return {
@@ -10,6 +20,7 @@ exports.getProduct = async (req, res, next) => {
           name: prod.name,
           price: prod.price,
           image_product: prod.image_product,
+          id_categories: prod.id_categories,
           request: {
             type: "GET",
             description: "return products by id",
@@ -26,11 +37,21 @@ exports.getProduct = async (req, res, next) => {
 
 exports.postProduct = async (req, res, next) => {
   try {
-    const query = `INSERT INTO products (name, price, image_product) VALUES (?, ?, ?)`;
+    const categoryQuery = `SELECT id_categories FROM categories WHERE id_categories = ?`;
+    const categoryResult = await mysql.execute(categoryQuery, [
+      req.body.id_categories,
+    ]);
+
+    if (categoryResult.length === 0) {
+      return res.status(404).send({ message: "Category not found" });
+    }
+
+    const query = `INSERT INTO products (name, price, image_product, id_categories) VALUES (?, ?, ?, ?)`;
     const result = await mysql.execute(query, [
       req.body.name,
       req.body.price,
       req.file.path,
+      req.body.id_categories,
     ]);
     const response = {
       message: "Product inserted successfully",
@@ -39,6 +60,7 @@ exports.postProduct = async (req, res, next) => {
         name: req.body.name,
         price: req.body.price,
         image_product: req.file.path,
+        id_categories: req.body.id_categories,
         request: {
           type: "GET",
           description: "get product by id",
@@ -67,6 +89,7 @@ exports.getProductById = async (req, res, next) => {
         name: result[0].name,
         price: result[0].price,
         image_product: result[0].image_product,
+        id_categories: result[0].id_categories,
         request: {
           type: "GET",
           description: "return all orders",
@@ -82,16 +105,36 @@ exports.getProductById = async (req, res, next) => {
 
 exports.patchProduct = async (req, res, next) => {
   try {
+    const categoryQuery = `SELECT id_categories FROM categories WHERE id_categories = ?`;
+    const categoryResult = await mysql.execute(categoryQuery, [
+      req.body.id_categories,
+    ]);
+
+    if (categoryResult.length === 0) {
+      return res.status(404).send({ message: "Category not found" });
+    }
+
+    const productQuery = "SELECT * FROM products WHERE id_product = ?;";
+    const productResult = await mysql.execute(productQuery, [
+      req.params.id_product,
+    ]);
+
+    if (productResult.length == 0) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+
     const query = `UPDATE products
                     SET name          = ?,
                         price         = ?,
-                        image_product = ?
-                 WHERE id_product     = ?`;
+                        image_product = ?,
+                        id_categories = ?
+                  WHERE id_product     = ?`;
     await mysql.execute(query, [
       req.body.name,
       req.body.price,
       req.file.path,
-      req.body.id_product,
+      req.body.id_categories,
+      req.params.id_product,
     ]);
 
     const response = {
@@ -101,6 +144,7 @@ exports.patchProduct = async (req, res, next) => {
         name: req.body.name,
         price: req.body.price,
         image_product: req.file.path,
+        id_categories: req.body.id_categories,
         request: {
           type: "GET",
           description: "return order by id",
@@ -118,7 +162,10 @@ exports.patchProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     const query = `DELETE FROM products WHERE id_product = ?`;
-    await mysql.execute(query, [req.params.id_product]);
+    const result = await mysql.execute(query, [req.params.id_product]);
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ message: "Product not found" });
+    }
     const response = {
       message: "Product deleted successfully",
       request: {
@@ -128,6 +175,8 @@ exports.deleteProduct = async (req, res, next) => {
         body: {
           name: "String",
           price: "Number",
+          image_product: "File",
+          id_categories: "Number",
         },
       },
     };
