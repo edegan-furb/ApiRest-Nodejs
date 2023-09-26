@@ -2,6 +2,8 @@
 
 - JSON Web Token
 - CRUD: Products, Orders, Categories and Images
+
+---
   
 ### Languages and Tools :
 <p>
