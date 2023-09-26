@@ -1,5 +1,7 @@
 # ApiRest-Nodejs
 ### Languages and Tools :
+- JSON Web Token
+- CRUD: Products, Orders, Categories and Images
 
 <p>
 <img src="https://github.com/devicons/devicon/blob/master/icons/docker/docker-plain-wordmark.svg" title="Docker" alt="Dooker" width="45" height="45"/>&nbsp;
