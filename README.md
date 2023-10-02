@@ -27,18 +27,3 @@
 </p>
 </div>
 
-
-
-
-
-
-# ApiRest-Nodejs
-
-- JSON Web Token
-- CRUD: Products, Orders, Categories and Images
-
----
-  
-### Languages and Tools :
-
-
