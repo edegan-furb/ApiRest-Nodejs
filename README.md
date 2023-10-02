@@ -1,12 +1,10 @@
 <div align="center">
   <h1>ApiRest-Nodejs</h1>
-  <div align="left">
   <p>
     JSON Web Token
     <br/>
     CRUD: Products, Orders, Categories and Images
   </p>
-  <div/>
   <p>
   <a href="https://github.com/edegan-furb/ApiRest-Nodejs/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/edegan-furb/ApiRest-Nodejs" alt="contributors" />
