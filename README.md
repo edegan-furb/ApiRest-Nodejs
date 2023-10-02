@@ -1,6 +1,5 @@
 <div align="center">
   <h1>ApiRest-Nodejs</h1>
-  
   <p>
     JSON Web Token
     <br/>
@@ -11,7 +10,7 @@
     <img src="https://img.shields.io/github/contributors/edegan-furb/ApiRest-Nodejs" alt="contributors" />
   </a>
   <a href="">
-    <img src="https://img.shields.io/github/last-commit/edegan/ApiRest-Nodejs" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/edegan-furb/ApiRest-Nodejs" alt="last update" />
   </a>
   <a href="https://github.com/edegan-furb/ApiRest-Nodejs/network/members">
     <img src="https://img.shields.io/github/forks/edegan-furb/ApiRest-Nodejs" alt="forks" />
